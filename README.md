@@ -40,3 +40,14 @@ indicado.
 este codigo me tomó 30 minutos en hacerlo. el dibujo en papel lo diseñe
 en un par de horas. al momento funciona muy bien.
 
+en el modelo en papel, las funciones son las siguientes:
+
+"Fn" : equivale a `transformMatrix()`, convierte una matrix de una dimension a otra,
+añade además un filtro de ruido.
+
+"Fc" : equivale a `compareMatrix`, compara dos matrices a ver si son iguales. hace
+una comparacion absoluta. en el futuro, esta funcion debería tener parametros de
+sensibilidad para que puedan ser ajustados como "pesos" por la red.
+
+![modelo en papel](modelo.jpg)
+
