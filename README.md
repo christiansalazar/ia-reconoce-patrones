@@ -49,5 +49,36 @@ añade además un filtro de ruido.
 una comparacion absoluta. en el futuro, esta funcion debería tener parametros de
 sensibilidad para que puedan ser ajustados como "pesos" por la red.
 
+## ejecucion
+
+aca se ve como transcurrio la prueba.  
+
+primero encontro dos patrones (B y D)
+al usar una matriz muy apretada de 2x2 (P=2), es esperado que muchos patrones
+coincidan en esta etapa.
+
+luego de hallar un par de patrones incremento la dimension de la matrix a 3x3,
+para asi refinar la comparacion en un grado mas alto. 
+aca se ve que con una `sensibility` de 0.01 no hallo patrones (ni B y D) que
+se parezcan al input. entonces la red procede a incrementar el `peso` de 
+`sensibility` en 0.01 unidades. asi hizo otras 6 pasadas tratando de ajustar
+la sensibilidad para obtener algun match. 
+
+Finalmente encontró a B como solucion. debido a que el ejemplo es corto 
+entonces hallo la solucion rapido.
+
+```
+generation:  P=2 S=0.01000 B,D,
+generation:  P=3 S=0.01000 
+generation:  P=3 S=0.02000 
+generation:  P=3 S=0.03000 
+generation:  P=3 S=0.04000 
+generation:  P=3 S=0.05000 
+generation:  P=3 S=0.06000 B,
+result= B
+```
+
+## modelo
+
 ![modelo en papel](modelo.jpg)
 

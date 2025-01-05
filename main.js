@@ -115,7 +115,7 @@ function transformMatrix2(matrix, newSize) {
     return transformMatrix(matrix, newSize / matrix.x);
 }
 
-function runGeneration(inputMatrix, matrixSize, patterns_list) {
+function runGeneration(inputMatrix, matrixSize, patterns_list, sensibility) {
   
     let R = [];
 
@@ -129,29 +129,59 @@ function runGeneration(inputMatrix, matrixSize, patterns_list) {
         
         // filtro de sensibilidad de la comparacion entre las dos matrices
         let dif = Math.abs(1.0 - comp);
-        if(dif <= 0.1) {
+        if(dif <= sensibility) {
             R.push(p);
         }
     }
 
+    let ids='';
+    for(let p of R){ ids += p.id+","; }
+    console.log("generation: ", "P="+P, "S="+sensibility.toFixed(5), ids);
     return R;
 }
 
-let result = null;
 let P = 2;
-let resultPatterns = runGeneration(input, P, patterns);
-let end=false;
-while(!end){
-    if(1 == resultPatterns.length){
-        end=true;
-        result = resultPatterns[0];
+let end = false;
+let result = null;
+let defaultSensibility = 0.01;
+let sensibility = defaultSensibility;
+let selectedPatterns = JSON.parse(JSON.stringify(patterns));
+
+do {
+
+    let patternsMatched = runGeneration(input, P, selectedPatterns, sensibility);
+    
+    if(patternsMatched.length == 1) {
+        end = true;
+        result = patternsMatched[0];
     }else{
-        P += 1;
-        if(P > input.x){
-            end=true;
+      
+        if(patternsMatched.length > 0) {
+        
+            selectedPatterns = patternsMatched; 
+                
+            P += 1;
+            if(P > input.x) {
+                end = true;
+            }
+        
         }else{
-            resultPatterns = runGeneration(input, P, resultPatterns);
+
+            // en cada generacion mejora la sensibilidad y la dimension P
+
+            sensibility+=0.01;
+
+            if(sensibility > 0.2) {
+                
+                sensibility = defaultSensibility;
+                P += 1;
+                if(P > input.x) {
+                    end = true;
+                }
+            }
         }
     }
-}
+
+}while(end == false);
+
 console.log("result=", result ? result.id : 'not found');
