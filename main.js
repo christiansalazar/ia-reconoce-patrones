@@ -38,13 +38,24 @@ input = { x: 8, y: 8, v: [
  0, 0, 0, 0, 0, 0, 0, 0,
 ]};
 
-function compareMatrix(matrix_a, matrix_b) {
-    for(let i=0; i<matrix_a.v.length; i++){
-        if(matrix_a.v[i] !== matrix_b.v[i]){
-            return false;
+function compareMatrix(m1, m2){
+    // retorna un valor decimal entre 0 y 1
+    // mientras mas se acerque al 1 mas parecida es m1 de m2
+
+    let k1 = 0.0, k2 = 0.0;
+
+    for(let j=0;j<m1.y;j++){
+        for(let i=0;i<m1.x;i++){
+            let offset = m1.y * j + i;
+            let k = (i+1)*(j+1);
+            k1 += k;
+            if(m1.v[offset] == m2.v[offset]) {
+                k2 += k;
+            }
         }
     }
-    return true;
+
+    return k2 / k1; 
 }
 
 function printMatrix(matrix) {
@@ -88,12 +99,11 @@ function transformMatrix(matrix, weight) {
         }
     }
 
-    // filtro por ruido
     for(let j=0;j<h2;j++){
         for(let i=0;i<w2;i++){
             let offset = j*mA.y + i;
             let v = (mB.v[offset]) ? (mA.v[offset] / mB.v[offset]) : 0; 
-            mA.v[offset] = (v >= 0.2) ? 1 : 0;
+            mA.v[offset] = (v >= 0.1) ? 1 : 0;
         }
     }
         
@@ -105,8 +115,8 @@ function transformMatrix2(matrix, newSize) {
     return transformMatrix(matrix, newSize / matrix.x);
 }
 
-function scan(inputMatrix, matrixSize, patterns_list) {
-   
+function runGeneration(inputMatrix, matrixSize, patterns_list) {
+  
     let R = [];
 
     let transformedMatrix = transformMatrix2(inputMatrix, matrixSize);
@@ -115,9 +125,11 @@ function scan(inputMatrix, matrixSize, patterns_list) {
         
         let transformedPatternMatrix = transformMatrix2(p, matrixSize);
 
-        let match = compareMatrix(transformedMatrix, transformedPatternMatrix);
-    
-        if(match) {
+        let comp = compareMatrix(transformedMatrix, transformedPatternMatrix);
+        
+        // filtro de sensibilidad de la comparacion entre las dos matrices
+        let dif = Math.abs(1.0 - comp);
+        if(dif <= 0.1) {
             R.push(p);
         }
     }
@@ -127,7 +139,7 @@ function scan(inputMatrix, matrixSize, patterns_list) {
 
 let result = null;
 let P = 2;
-let resultPatterns = scan(input, P, patterns);
+let resultPatterns = runGeneration(input, P, patterns);
 let end=false;
 while(!end){
     if(1 == resultPatterns.length){
@@ -138,8 +150,8 @@ while(!end){
         if(P > input.x){
             end=true;
         }else{
-            resultPatterns = scan(input, P, resultPatterns);
+            resultPatterns = runGeneration(input, P, resultPatterns);
         }
     }
 }
-console.log("result=", result.id);
+console.log("result=", result ? result.id : 'not found');
