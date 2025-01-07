@@ -25,6 +25,12 @@ let patterns = [
         0, 0, 1, 0, 
         0, 0, 1, 1, 
     ]}, 
+    { id:'E', x: 4, y: 4, v: [ 
+        1, 0, 0, 0, 
+        1, 1, 0, 0, 
+        0, 0, 1, 0, 
+        0, 0, 0, 1, 
+    ]}, 
 ];
 
 input = { x: 8, y: 8, v: [
@@ -38,7 +44,7 @@ input = { x: 8, y: 8, v: [
  0, 0, 0, 0, 0, 0, 0, 0,
 ]};
 
-function compareMatrix(m1, m2){
+function compareMatrix(m1, m2, sensibility){
     // retorna un valor decimal entre 0 y 1
     // mientras mas se acerque al 1 mas parecida es m1 de m2
 
@@ -49,7 +55,10 @@ function compareMatrix(m1, m2){
             let offset = m1.y * j + i;
             let k = (i+1)*(j+1);
             k1 += k;
-            if(m1.v[offset] == m2.v[offset]) {
+            
+            let diff = Math.abs(m1.v[offset] - m2.v[offset]);
+
+            if(diff <= sensibility) {
                 k2 += k;
             }
         }
@@ -103,7 +112,7 @@ function transformMatrix(matrix, weight) {
         for(let i=0;i<w2;i++){
             let offset = j*mA.y + i;
             let v = (mB.v[offset]) ? (mA.v[offset] / mB.v[offset]) : 0; 
-            mA.v[offset] = (v >= 0.1) ? 1 : 0;
+            //mA.v[offset] = (v >= 0.1) ? 1 : 0;
         }
     }
         
@@ -125,11 +134,10 @@ function runGeneration(inputMatrix, matrixSize, patterns_list, sensibility) {
         
         let transformedPatternMatrix = transformMatrix2(p, matrixSize);
 
-        let comp = compareMatrix(transformedMatrix, transformedPatternMatrix);
+        let match = compareMatrix(
+            transformedMatrix, transformedPatternMatrix, sensibility);
         
-        // filtro de sensibilidad de la comparacion entre las dos matrices
-        let dif = Math.abs(1.0 - comp);
-        if(dif <= sensibility) {
+        if(match) {
             R.push(p);
         }
     }
