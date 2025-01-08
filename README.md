@@ -78,6 +78,8 @@ generation:  P=3 S=0.06000 B,
 result= B
 ```
 
+![ejecucion](test.jpg)
+
 ## modelo
 
 ![modelo en papel](modelo.jpg)

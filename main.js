@@ -58,26 +58,20 @@ input = { x: 8, y: 8, v: [
  0, 0, 0, 0, 0, 0, 0, 0,
 ]};
 
-function compareMatrix(m1, m2, sensibility){
+function compareMatrix(m1, m2, sensibility=0.1){
     // retorna un valor decimal entre 0 y 1
     // mientras mas se acerque al 1 mas parecida es m1 de m2
-
+    
     let k1 = 0.0, k2 = 0.0;
-
-    for(let j=0;j<m1.y;j++){
-        for(let i=0;i<m1.x;i++){
-            let offset = m1.y * j + i;
-            let k = (i+1)*(j+1);
-            k1 += k;
-            
-            let diff = Math.abs(m1.v[offset] - m2.v[offset]);
-
-            if(diff <= sensibility) {
-                k2 += k;
-            }
+    
+    for(let i=0;i<m1.v.length;i++){
+        let diff = Math.abs(m1.v[i] - m2.v[i]);
+        k1 += (i+1);
+        if(diff <= sensibility) {
+            k2 += (i+1);
         }
     }
-
+    
     return k2 / k1; 
 }
 
@@ -146,7 +140,7 @@ function transformMatrix(matrix, weight) {
         for(let i=0;i<w2;i++){
             let offset = j*mA.y + i;
             let v = (mB.v[offset]) ? (mA.v[offset] / mB.v[offset]) : 0; 
-            //mA.v[offset] = (v >= 0.1) ? 1 : 0;
+            mA.v[offset] = (v >= 0.1) ? 1 : 0;
         }
     }
         
@@ -158,27 +152,39 @@ function transformMatrix2(matrix, newSize) {
     return transformMatrix(matrix, newSize / matrix.x);
 }
 
-function runGeneration(inputMatrix, matrixSize, patterns_list, sensibility) {
+function runGeneration(NG, inputMatrix, matrixSize, patterns_list, 
+    matrixSensibility, compareSensibility) {
   
     let R = [];
 
+    console.log("[gen "+NG+"]", matrixSize, matrixSensibility.toFixed(4), compareSensibility);
+    
+    //console.log(printMatrix(inputMatrix));
+
     let transformedMatrix = transformMatrix2(inputMatrix, matrixSize);
+    
+    console.log(printMatrix(transformedMatrix));
+    
+    console.log(">");
 
     for(let p of patterns_list){
         
         let transformedPatternMatrix = transformMatrix2(p, matrixSize);
 
         let match = compareMatrix(
-            transformedMatrix, transformedPatternMatrix, sensibility);
+            transformedMatrix, transformedPatternMatrix, matrixSensibility);
+    
+        console.log(p.id, "match="+match);
+        console.log(printMatrix(transformedPatternMatrix));
         
-        if(match) {
+        if(match >= compareSensibility) {
+            console.log("+"+p.id);
             R.push(p);
+        }else{
+            console.log("-"+p.id+"("+match+")");
         }
     }
 
-    let ids='';
-    for(let p of R){ ids += p.id+","; }
-    console.log("generation: ", "P="+P, "S="+sensibility.toFixed(5), ids);
     return R;
 }
 
@@ -189,14 +195,16 @@ let defaultSensibility = 0.01;
 let sensibility = defaultSensibility;
 let selectedPatterns = JSON.parse(JSON.stringify(patterns));
 
-console.log(printMatrix(input));
-console.log(printMatrix(transformMatrix2(input, 2)));
-return;
+let NG=0;
 
 do {
 
-    let patternsMatched = runGeneration(input, P, selectedPatterns, sensibility);
-    
+    NG++;
+    if(NG > 3) { break; }
+
+    let patternsMatched = runGeneration(NG,
+        input, P, selectedPatterns, sensibility, 0.9);
+
     if(patternsMatched.length == 1) {
         end = true;
         result = patternsMatched[0];
@@ -217,7 +225,7 @@ do {
 
             sensibility+=0.01;
 
-            if(sensibility > 0.2) {
+            if(sensibility > 1) {
                 
                 sensibility = defaultSensibility;
                 P += 1;
