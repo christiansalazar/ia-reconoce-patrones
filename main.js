@@ -1,4 +1,18 @@
 
+const caracteres = [
+  { codigo: 0x25A0, simbolo: String.fromCharCode(0x25A0) }, // █ (cuadro relleno completo)
+  { codigo: 0x25A1, simbolo: String.fromCharCode(0x25A1) }, // □ (cuadro vacío)
+  { codigo: 0x25AA, simbolo: String.fromCharCode(0x25AA) }, // ▪ (cuadro pequeño relleno)
+  { codigo: 0x25AB, simbolo: String.fromCharCode(0x25AB) }, // ▫ (cuadro pequeño vacío)
+  { codigo: 0x25FE, simbolo: String.fromCharCode(0x25FE) }, // ▿ (triángulo relleno)
+  { codigo: 0x2588, simbolo: String.fromCharCode(0x2588) }, // ▉ (cuadro relleno)
+  { codigo: 0x2591, simbolo: String.fromCharCode(0x2591) }, // ░ (cuadro sombreado ligero)
+  { codigo: 0x2592, simbolo: String.fromCharCode(0x2592) }, // ▒ (cuadro sombreado mediano)
+  { codigo: 0x2593, simbolo: String.fromCharCode(0x2593) }, // ▓ (cuadro sombreado completo)
+  { codigo: 0x25B6, simbolo: String.fromCharCode(0x25B6) }, // ▶ (triángulo hacia la derecha)
+  { codigo: 0x25B7, simbolo: String.fromCharCode(0x25B7) },  // ▷ (triángulo avanzado)
+];
+
 let input = null;
 let patterns = [
     { id:'A', x: 4, y: 4, v: [ 
@@ -67,16 +81,36 @@ function compareMatrix(m1, m2, sensibility){
     return k2 / k1; 
 }
 
-function printMatrix(matrix) {
-    let s = "", sep='',n=0;
-    for(let i=0; i<matrix.y;i++){
+function charByColorLevel(character, value) {
+    value = Math.max(0, Math.min(10, value));
+    const intensity = Math.floor((value / 10) * 255);  // Escala de 0 a 255
+    const redColorCode = `\x1b[38;2;${intensity};0;0m`; // Código ANSI para color rojo con intensidad
+    return `${redColorCode}${character}\x1b[0m`;
+}
+
+function printMatrix(matrix, useValue=false) {
+    
+    let s = "", sep='';
+    let trimValue = 2;
+
+    for(let j=0; j<matrix.y;j++){
         sep='';
-        for(let j=0; j<matrix.x;j++){
-            s += sep + matrix.v[n++];
-            sep = ',';
+        if(j>0){ s += '\n'; }
+        for(let i=0; i<matrix.x; i++){
+            let v = matrix.v[matrix.y*j + i];
+            
+            if(true == useValue){
+                s += sep + v;
+                sep = ',';
+            }else{
+                if(v > trimValue){ v = trimValue; }    
+                let level = (10 * v)/trimValue;
+
+                s += sep + charByColorLevel(String.fromCharCode(0x2588), level);
+            }
         }
-        s+="\n";
     }
+    
     return s;
 }
 
@@ -154,6 +188,10 @@ let result = null;
 let defaultSensibility = 0.01;
 let sensibility = defaultSensibility;
 let selectedPatterns = JSON.parse(JSON.stringify(patterns));
+
+console.log(printMatrix(input));
+console.log(printMatrix(transformMatrix2(input, 2)));
+return;
 
 do {
 
