@@ -165,6 +165,8 @@ function runGeneration(NG, inputMatrix, matrixSize, patterns_list,
     
     console.log(">");
 
+    let closerPattern = { p:null, value:0.0 };
+
     for(let p of patterns_list){
         
         let transformedPatternMatrix = transformMatrix2(p, matrixSize);
@@ -174,13 +176,23 @@ function runGeneration(NG, inputMatrix, matrixSize, patterns_list,
     
         console.log(p.id, "match="+match);
         console.log(printMatrix(transformedPatternMatrix));
-        
+      
+        if(match > closerPattern.value){
+            closerPattern.value = match;
+            closerPattern.p = p;
+        }
+
         if(match >= compareSensibility) {
             console.log("+"+p.id);
             R.push(p);
         }else{
             console.log("-"+p.id+"("+match+")");
         }
+    }
+
+    if((!R.length) && (closerPattern.value > 0)){
+        console.log("closer:", closerPattern.p.id, closerPattern.value);
+        R.push(closerPattern.p);
     }
 
     return R;
@@ -205,33 +217,29 @@ do {
     let patternsMatched = runGeneration(NG,
         input, P, selectedPatterns, sensibility, 0.9);
 
-    if(patternsMatched.length == 1) {
-        end = true;
-        result = patternsMatched[0];
+    if(patternsMatched.length > 0) {
+    
+        selectedPatterns = patternsMatched; 
+   
+        result = selectedPatterns[0];
+
+        P += 1;
+        if(P > input.x) {
+            end = true;
+        }
+    
     }else{
-      
-        if(patternsMatched.length > 0) {
-        
-            selectedPatterns = patternsMatched; 
-                
+
+        // en cada generacion mejora la sensibilidad y la dimension P
+
+        sensibility+=0.01;
+
+        if(sensibility > 1) {
+            
+            sensibility = defaultSensibility;
             P += 1;
             if(P > input.x) {
                 end = true;
-            }
-        
-        }else{
-
-            // en cada generacion mejora la sensibilidad y la dimension P
-
-            sensibility+=0.01;
-
-            if(sensibility > 1) {
-                
-                sensibility = defaultSensibility;
-                P += 1;
-                if(P > input.x) {
-                    end = true;
-                }
             }
         }
     }
