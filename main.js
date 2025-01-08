@@ -158,8 +158,6 @@ function runGeneration(NG, inputMatrix, matrixSize, patterns_list,
     let R = [];
 
     console.log("[gen "+NG+"]", matrixSize, matrixSensibility.toFixed(4), compareSensibility);
-    
-    //console.log(printMatrix(inputMatrix));
 
     let transformedMatrix = transformMatrix2(inputMatrix, matrixSize);
     
@@ -196,11 +194,13 @@ let sensibility = defaultSensibility;
 let selectedPatterns = JSON.parse(JSON.stringify(patterns));
 
 let NG=0;
+    
+console.log(printMatrix(input));
+console.log("generaciones:");
 
 do {
 
     NG++;
-    if(NG > 3) { break; }
 
     let patternsMatched = runGeneration(NG,
         input, P, selectedPatterns, sensibility, 0.9);
